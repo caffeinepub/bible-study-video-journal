@@ -1,9 +1,9 @@
 @font-face {
-  font-family: "Playfair Display";
+  font-family: "Fraunces";
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url("/assets/fonts/PlayfairDisplay[wght].woff2") format("woff2");
+  src: url("/assets/fonts/Fraunces[SOFT,WONK,opsz,wght].woff2") format("woff2");
 }
 
 @font-face {
@@ -23,11 +23,19 @@
 }
 
 @font-face {
-  font-family: "General Sans";
+  font-family: "Crimson Pro";
   font-style: normal;
-  font-weight: 200 700;
+  font-weight: 200 900;
   font-display: swap;
-  src: url("/assets/fonts/GeneralSans-Variable.woff2") format("woff2");
+  src: url("/assets/fonts/CrimsonPro-Variable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Crimson Pro";
+  font-style: italic;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("/assets/fonts/CrimsonPro-Italic.woff2") format("woff2");
 }
 
 @tailwind base;
@@ -93,14 +101,14 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "General Sans", sans-serif;
+    font-family: "Crimson Pro", serif;
   }
 
   h1,
   h2,
   h3,
   h4 {
-    font-family: "Playfair Display", serif;
+    font-family: "Fraunces", serif;
   }
 }
 

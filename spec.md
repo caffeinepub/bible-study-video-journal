@@ -1,33 +1,34 @@
 # Bible Study Video Journal
 
 ## Current State
-New project. No existing code.
+Single shared video store. Any authenticated (non-guest) user can upload videos. `getAllVideos()` returns all videos from all users in one pool. Admin and users share the same gallery view.
 
 ## Requested Changes (Diff)
 
 ### Add
-- A video upload page where the user can upload videos of their Bible study/reading sessions
-- Video listing/gallery page to view all uploaded videos
-- Video player to watch uploaded videos
-- Metadata per video: title, description, date uploaded, optional Bible passage/reference
-- Authorization so only the owner can upload/manage videos
-- Blob storage for video files
+- `getMyVideos()` backend method: returns only videos uploaded by the calling principal
+- `getPublicFeedVideos()` backend method: returns only videos uploaded by admin users (the host's study chain)
+- Two-tab UI on the home page:
+  - "Scripture Journal" tab (public, visible to all): shows only the host/admin's videos via `getPublicFeedVideos()`
+  - "My Studies" tab (visible only when authenticated): shows the caller's own videos via `getMyVideos()`
+- Upload button context: when on "My Studies" tab, uploads go to the user's own chain
+- Each user's uploads stay isolated from the host's public feed
 
 ### Modify
-- N/A
+- `getAllVideos()` remains for admin use; public feed switches to `getPublicFeedVideos()`
+- Nav header subtitle updated to reflect the community-oriented purpose
+- Hero section text updated to reflect that visitors can browse the host's studies or start their own
+- Empty states customized per tab
 
 ### Remove
-- N/A
+- Nothing removed
 
 ## Implementation Plan
-1. Select `blob-storage` and `authorization` Caffeine components
-2. Generate Motoko backend with:
-   - Video metadata store (title, description, Bible reference, blob ID, upload date)
-   - CRUD operations: upload video metadata, list videos, delete video
-   - Authorization-gated mutations
-3. Frontend:
-   - Home/gallery page: grid of uploaded videos with title, Bible reference, date
-   - Upload form: title, optional Bible passage reference, optional description, video file picker
-   - Video player modal/page to watch a selected video
-   - Empty state when no videos exist
-   - Delete button per video (owner only)
+1. Add `getMyVideos()` to main.mo (filter videoEntries by caller principal)
+2. Add `getPublicFeedVideos()` to main.mo (filter by admin principal)
+3. Update backend.d.ts to include both new methods
+4. Add tab navigation to App.tsx: "Scripture Journal" and "My Studies"
+5. Wire "Scripture Journal" tab to `getPublicFeedVideos()` hook
+6. Wire "My Studies" tab to `getMyVideos()` hook (only shown when authenticated)
+7. Customize empty states per tab
+8. Ensure upload always adds to the caller's own collection (existing `addVideoEntry` already ties to `uploadedBy = caller`)

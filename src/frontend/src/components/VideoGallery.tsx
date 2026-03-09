@@ -8,12 +8,14 @@ interface VideoGalleryProps {
   videos: VideoEntry[];
   isLoading: boolean;
   onSelectVideo: (video: VideoEntry) => void;
+  emptyMessage?: string;
 }
 
 export function VideoGallery({
   videos,
   isLoading,
   onSelectVideo,
+  emptyMessage,
 }: VideoGalleryProps) {
   if (isLoading) {
     return (
@@ -52,11 +54,11 @@ export function VideoGallery({
             </div>
           </div>
           <h3 className="font-display text-xl font-semibold text-foreground mb-2">
-            Your Journal Awaits
+            {emptyMessage ? "Nothing Here Yet" : "Your Journal Awaits"}
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            No videos yet. Start by uploading your first Bible study session and
-            build a beautiful record of your spiritual journey.
+            {emptyMessage ??
+              "No videos yet. Start by uploading your first Bible study session and build a beautiful record of your spiritual journey."}
           </p>
           <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground/60">
             <div className="w-8 h-px bg-border" />

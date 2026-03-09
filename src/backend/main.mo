@@ -72,6 +72,16 @@ actor {
     videoEntries.values().toArray().sort();
   };
 
+  public query ({ caller }) func getMyVideos() : async [VideoEntry] {
+    videoEntries.values().filter(func(v : VideoEntry) : Bool { v.uploadedBy == caller }).toArray().sort();
+  };
+
+  public query ({ caller }) func getPublicFeedVideos() : async [VideoEntry] {
+    videoEntries.values().filter(func(v : VideoEntry) : Bool {
+      AccessControl.isAdmin(accessControlState, v.uploadedBy);
+    }).toArray().sort();
+  };
+
   public query ({ caller }) func getVideo(id : Text) : async ?VideoEntry {
     videoEntries.get(id);
   };

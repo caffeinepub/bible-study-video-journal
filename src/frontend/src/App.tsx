@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BookMarked,
   BookOpen,
@@ -7,8 +8,9 @@ import {
   LogIn,
   LogOut,
   Upload,
+  Users,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import type { VideoEntry } from "./backend";
 import { UserRole } from "./backend";
@@ -16,19 +18,27 @@ import { UploadModal } from "./components/UploadModal";
 import { VideoGallery } from "./components/VideoGallery";
 import { VideoPlayerModal } from "./components/VideoPlayerModal";
 import { useInternetIdentity } from "./hooks/useInternetIdentity";
-import { useGetAllVideos, useGetUserRole } from "./hooks/useQueries";
+import {
+  useGetMyVideos,
+  useGetPublicFeedVideos,
+  useGetUserRole,
+} from "./hooks/useQueries";
 
 export default function App() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<VideoEntry | null>(null);
+  const [activeTab, setActiveTab] = useState("scripture-journal");
   const { identity, login, clear, isLoggingIn, isInitializing } =
     useInternetIdentity();
   const isAuthenticated = !!identity;
 
-  const { data: videos = [], isLoading: videosLoading } = useGetAllVideos();
+  const { data: publicVideos = [], isLoading: publicLoading } =
+    useGetPublicFeedVideos();
+  const { data: myVideos = [], isLoading: myVideosLoading } = useGetMyVideos();
   const { data: userRole } = useGetUserRole();
 
   const canUpload = isAuthenticated && userRole !== UserRole.guest;
+  const isOnMyStudies = activeTab === "my-studies";
 
   return (
     <div className="min-h-screen parchment-texture">
@@ -52,7 +62,7 @@ export default function App() {
                   Scripture Journal
                 </h1>
                 <p className="text-xs text-muted-foreground">
-                  Your Bible study video archive
+                  Community Bible Study Platform
                 </p>
               </div>
             </motion.div>
@@ -68,17 +78,27 @@ export default function App() {
                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
               ) : isAuthenticated ? (
                 <>
-                  {canUpload && (
-                    <Button
-                      data-ocid="nav.upload_button"
-                      onClick={() => setUploadOpen(true)}
-                      size="sm"
-                      className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                    >
-                      <Upload className="w-4 h-4" />
-                      <span className="hidden sm:inline">Upload Video</span>
-                    </Button>
-                  )}
+                  <AnimatePresence>
+                    {canUpload && isOnMyStudies && (
+                      <motion.div
+                        key="upload-btn"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Button
+                          data-ocid="nav.upload_button"
+                          onClick={() => setUploadOpen(true)}
+                          size="sm"
+                          className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                        >
+                          <Upload className="w-4 h-4" />
+                          <span className="hidden sm:inline">Upload Video</span>
+                        </Button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -122,20 +142,20 @@ export default function App() {
               <div className="flex items-center gap-2 mb-3">
                 <BookOpen className="w-4 h-4 text-accent-foreground/60" />
                 <span className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
-                  Personal Archive
+                  Community Archive
                 </span>
               </div>
               <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground leading-tight mb-3">
-                Your Bible Study
+                Bible Study
                 <br />
                 <span className="font-serif italic font-normal text-muted-foreground">
                   Video Journal
                 </span>
               </h2>
               <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-                Capture and revisit your moments of study, reflection, and
-                discovery in God&#39;s word. Every session recorded is a step in
-                your spiritual journey.
+                Browse the host&#39;s Bible study sessions below, or sign in to
+                start your own personal study journal — your sessions stay
+                private to your account.
               </p>
 
               {/* Decorative verse */}
@@ -166,7 +186,7 @@ export default function App() {
                     ) : (
                       <LogIn className="w-4 h-4" />
                     )}
-                    Sign in to Upload Videos
+                    Sign in to Start Your Journal
                   </Button>
                 </motion.div>
               )}
@@ -176,37 +196,99 @@ export default function App() {
 
         {/* Main content */}
         <main className="container mx-auto px-4 py-10">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="font-display text-xl font-semibold text-foreground">
-                Study Sessions
-              </h2>
-              {!videosLoading && videos.length > 0 && (
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {videos.length}{" "}
-                  {videos.length === 1 ? "recording" : "recordings"} in your
-                  journal
-                </p>
-              )}
-            </div>
-            {isAuthenticated && canUpload && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setUploadOpen(true)}
-                className="gap-2 border-accent/40 hover:bg-accent/10 sm:hidden"
-              >
-                <Upload className="w-4 h-4" />
-                Upload
-              </Button>
-            )}
-          </div>
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-6"
+          >
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <TabsList className="bg-muted/60 border border-border">
+                <TabsTrigger
+                  data-ocid="tabs.scripture-journal.tab"
+                  value="scripture-journal"
+                  className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>Scripture Journal</span>
+                </TabsTrigger>
+                {isAuthenticated && (
+                  <TabsTrigger
+                    data-ocid="tabs.my-studies.tab"
+                    value="my-studies"
+                    className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>My Studies</span>
+                  </TabsTrigger>
+                )}
+              </TabsList>
 
-          <VideoGallery
-            videos={videos}
-            isLoading={videosLoading}
-            onSelectVideo={setSelectedVideo}
-          />
+              {/* Upload button for My Studies tab on smaller screens */}
+              <AnimatePresence>
+                {canUpload && isOnMyStudies && (
+                  <motion.div
+                    key="upload-mobile"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                    className="sm:hidden"
+                  >
+                    <Button
+                      data-ocid="gallery.upload_button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setUploadOpen(true)}
+                      className="gap-2 border-accent/40 hover:bg-accent/10"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Scripture Journal Tab — host's public feed */}
+            <TabsContent value="scripture-journal" className="mt-0">
+              <div className="mb-4">
+                <p className="text-xs text-muted-foreground">
+                  {!publicLoading && publicVideos.length > 0
+                    ? `${publicVideos.length} ${
+                        publicVideos.length === 1 ? "session" : "sessions"
+                      } published`
+                    : "The host's Bible study sessions"}
+                </p>
+              </div>
+              <VideoGallery
+                videos={publicVideos}
+                isLoading={publicLoading}
+                onSelectVideo={setSelectedVideo}
+                emptyMessage="No sessions published yet. Check back soon."
+              />
+            </TabsContent>
+
+            {/* My Studies Tab — personal journal */}
+            {isAuthenticated && (
+              <TabsContent value="my-studies" className="mt-0">
+                <div className="mb-4">
+                  <p className="text-xs text-muted-foreground">
+                    {!myVideosLoading && myVideos.length > 0
+                      ? `${myVideos.length} ${
+                          myVideos.length === 1 ? "recording" : "recordings"
+                        } in your journal`
+                      : "Your personal study recordings"}
+                  </p>
+                </div>
+                <VideoGallery
+                  videos={myVideos}
+                  isLoading={myVideosLoading}
+                  onSelectVideo={setSelectedVideo}
+                  emptyMessage="You haven't recorded any studies yet. Hit Upload to start your own journal."
+                />
+              </TabsContent>
+            )}
+          </Tabs>
         </main>
 
         {/* Footer */}

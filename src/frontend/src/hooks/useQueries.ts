@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type ExternalBlob, UserRole, type VideoEntry } from "../backend";
 import { useActor } from "./useActor";
+import { useInternetIdentity } from "./useInternetIdentity";
 
 export function useGetAllVideos() {
   const { actor, isFetching } = useActor();
@@ -11,6 +12,34 @@ export function useGetAllVideos() {
       return actor.getAllVideos();
     },
     enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetPublicFeedVideos() {
+  const { actor, isFetching } = useActor();
+  return useQuery<VideoEntry[]>({
+    queryKey: ["publicFeedVideos"],
+    queryFn: async () => {
+      if (!actor) return [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (actor as any).getPublicFeedVideos() as Promise<VideoEntry[]>;
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetMyVideos() {
+  const { actor, isFetching } = useActor();
+  const { identity } = useInternetIdentity();
+  const isAuthenticated = !!identity;
+  return useQuery<VideoEntry[]>({
+    queryKey: ["myVideos"],
+    queryFn: async () => {
+      if (!actor) return [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (actor as any).getMyVideos() as Promise<VideoEntry[]>;
+    },
+    enabled: !!actor && !isFetching && isAuthenticated,
   });
 }
 
@@ -55,6 +84,8 @@ export function useAddVideoEntry() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["videos"] });
+      queryClient.invalidateQueries({ queryKey: ["myVideos"] });
+      queryClient.invalidateQueries({ queryKey: ["publicFeedVideos"] });
     },
   });
 }
@@ -70,6 +101,8 @@ export function useDeleteVideoEntry() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["videos"] });
+      queryClient.invalidateQueries({ queryKey: ["myVideos"] });
+      queryClient.invalidateQueries({ queryKey: ["publicFeedVideos"] });
     },
   });
 }
