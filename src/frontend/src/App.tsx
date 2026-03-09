@@ -134,12 +134,12 @@ export default function App() {
         <section className="border-b border-border bg-gradient-to-b from-background/60 to-transparent">
           <div className="container mx-auto px-4 py-12 md:py-16">
             <motion.div
-              className="max-w-2xl"
+              className="max-w-2xl mx-auto text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center justify-center gap-2 mb-3">
                 <BookOpen className="w-4 h-4 text-accent-foreground/60" />
                 <span className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
                   Community Archive
@@ -152,13 +152,13 @@ export default function App() {
                   Video Journal
                 </span>
               </h2>
-              <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Browse Bible study sessions shared by the community below, or
                 sign in to share your own.
               </p>
 
               {/* Decorative verse */}
-              <div className="mt-6 pl-4 border-l-2 border-accent/50">
+              <div className="mt-6">
                 <p className="font-serif italic text-sm text-muted-foreground">
                   &#8220;Thy word is a lamp unto my feet, and a light unto my
                   path.&#8221;
@@ -170,7 +170,7 @@ export default function App() {
 
               {!isAuthenticated && !isInitializing && (
                 <motion.div
-                  className="mt-6"
+                  className="mt-6 flex justify-center"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
@@ -251,7 +251,7 @@ export default function App() {
             {/* Scripture Journal Tab — community public feed */}
             <TabsContent value="scripture-journal" className="mt-0">
               <div className="mb-4">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-base text-muted-foreground">
                   {!publicLoading && publicVideos.length > 0
                     ? `${publicVideos.length} ${
                         publicVideos.length === 1 ? "session" : "sessions"
@@ -272,7 +272,7 @@ export default function App() {
             {isAuthenticated && (
               <TabsContent value="my-studies" className="mt-0">
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-base text-muted-foreground">
                     {!myVideosLoading && myVideos.length > 0
                       ? `${myVideos.length} ${
                           myVideos.length === 1 ? "recording" : "recordings"
