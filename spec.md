@@ -1,34 +1,29 @@
 # Bible Study Video Journal
 
 ## Current State
-Single shared video store. Any authenticated (non-guest) user can upload videos. `getAllVideos()` returns all videos from all users in one pool. Admin and users share the same gallery view.
+- "Scripture Journal" tab shows only videos uploaded by the admin/host (filtered by `getPublicFeedVideos` which checks `isAdmin(uploadedBy)`)
+- "My Studies" tab shows only the signed-in user's own videos
+- Upload is restricted to authenticated, non-guest users, but the upload button only appears on the "My Studies" tab
+- Public cannot see community uploads
 
 ## Requested Changes (Diff)
 
 ### Add
-- `getMyVideos()` backend method: returns only videos uploaded by the calling principal
-- `getPublicFeedVideos()` backend method: returns only videos uploaded by admin users (the host's study chain)
-- Two-tab UI on the home page:
-  - "Scripture Journal" tab (public, visible to all): shows only the host/admin's videos via `getPublicFeedVideos()`
-  - "My Studies" tab (visible only when authenticated): shows the caller's own videos via `getMyVideos()`
-- Upload button context: when on "My Studies" tab, uploads go to the user's own chain
-- Each user's uploads stay isolated from the host's public feed
+- A community public feed that shows ALL uploaded videos from all users
+- Uploader identity on each video card in the community feed
+- Upload button accessible from the community/public feed tab
 
 ### Modify
-- `getAllVideos()` remains for admin use; public feed switches to `getPublicFeedVideos()`
-- Nav header subtitle updated to reflect the community-oriented purpose
-- Hero section text updated to reflect that visitors can browse the host's studies or start their own
-- Empty states customized per tab
+- `getPublicFeedVideos()` backend method: return ALL videos, not just admin-uploaded ones
+- Upload button visibility: show on the public feed tab when authenticated
+- Video cards in community feed show uploader info (shortened principal or "You" for own videos)
+- Hero text updated to reflect community sharing
 
 ### Remove
-- Nothing removed
+- Admin-only filter on the public feed
 
 ## Implementation Plan
-1. Add `getMyVideos()` to main.mo (filter videoEntries by caller principal)
-2. Add `getPublicFeedVideos()` to main.mo (filter by admin principal)
-3. Update backend.d.ts to include both new methods
-4. Add tab navigation to App.tsx: "Scripture Journal" and "My Studies"
-5. Wire "Scripture Journal" tab to `getPublicFeedVideos()` hook
-6. Wire "My Studies" tab to `getMyVideos()` hook (only shown when authenticated)
-7. Customize empty states per tab
-8. Ensure upload always adds to the caller's own collection (existing `addVideoEntry` already ties to `uploadedBy = caller`)
+1. Backend: update `getPublicFeedVideos()` to return all videos (remove admin filter)
+2. Frontend: show upload button on the public/community tab, not just "My Studies"
+3. Frontend: add uploader info on video cards
+4. Frontend: update hero description text to reflect community-sharing nature

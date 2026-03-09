@@ -35,6 +35,11 @@ export function VideoPlayerModal({
     : false;
   const canDelete = isAdmin || isOwner;
 
+  const uploaderPrincipal = video?.uploadedBy.toString() ?? "";
+  const uploaderLabel = isOwner
+    ? "You"
+    : `${uploaderPrincipal.slice(0, 8)}\u2026`;
+
   useEffect(() => {
     if (!video) {
       setVideoUrl(null);
@@ -49,7 +54,7 @@ export function VideoPlayerModal({
     if (!video) return;
     try {
       await deleteEntry.mutateAsync(video.id);
-      toast.success("Video removed from your journal");
+      toast.success("Video removed from the community feed");
       onClose();
     } catch {
       toast.error("Failed to delete video. Please try again.");
@@ -144,7 +149,7 @@ export function VideoPlayerModal({
                   </Badge>
                   <Badge variant="outline" className="gap-1.5 text-xs">
                     <User className="w-3 h-3" />
-                    {video.uploadedBy.toString().slice(0, 8)}&hellip;
+                    {uploaderLabel}
                   </Badge>
                 </div>
 

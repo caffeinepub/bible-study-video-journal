@@ -1,10 +1,11 @@
 import Text "mo:core/Text";
 import Map "mo:core/Map";
-import Order "mo:core/Order";
 import Array "mo:core/Array";
+import Order "mo:core/Order";
 import Runtime "mo:core/Runtime";
 import Iter "mo:core/Iter";
 import Time "mo:core/Time";
+import Int "mo:core/Int";
 import Principal "mo:core/Principal";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
@@ -69,6 +70,9 @@ actor {
   };
 
   public query ({ caller }) func getAllVideos() : async [VideoEntry] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
     videoEntries.values().toArray().sort();
   };
 
@@ -77,9 +81,11 @@ actor {
   };
 
   public query ({ caller }) func getPublicFeedVideos() : async [VideoEntry] {
-    videoEntries.values().filter(func(v : VideoEntry) : Bool {
-      AccessControl.isAdmin(accessControlState, v.uploadedBy);
-    }).toArray().sort();
+    videoEntries.values().toArray().sort(
+      func(a, b) {
+        Int.compare(b.uploadDate, a.uploadDate);
+      }
+    );
   };
 
   public query ({ caller }) func getVideo(id : Text) : async ?VideoEntry {

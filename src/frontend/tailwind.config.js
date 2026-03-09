@@ -16,9 +16,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Playfair Display", "Georgia", "serif"],
-        serif: ["Instrument Serif", "Georgia", "serif"],
-        sans: ["General Sans", "system-ui", "sans-serif"],
+        display: ["Fraunces", "Georgia", "serif"],
+        serif: ["Crimson Pro", "Georgia", "serif"],
+        sans: ["Crimson Pro", "Georgia", "serif"],
       },
       colors: {
         border: "oklch(var(--border))",

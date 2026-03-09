@@ -1,4 +1,4 @@
-import { BookOpen, Calendar, Play } from "lucide-react";
+import { BookOpen, Calendar, Play, User } from "lucide-react";
 import { motion } from "motion/react";
 import type { VideoEntry } from "../backend";
 import { formatNanoDate } from "../utils/formatDate";
@@ -7,10 +7,21 @@ interface VideoCardProps {
   video: VideoEntry;
   index: number;
   onClick: () => void;
+  callerPrincipal?: string;
 }
 
-export function VideoCard({ video, index, onClick }: VideoCardProps) {
+export function VideoCard({
+  video,
+  index,
+  onClick,
+  callerPrincipal,
+}: VideoCardProps) {
   const ocid = `gallery.item.${index}`;
+  const uploaderPrincipal = video.uploadedBy.toString();
+  const isOwn = callerPrincipal && callerPrincipal === uploaderPrincipal;
+  const uploaderLabel = isOwn
+    ? "You"
+    : `${uploaderPrincipal.slice(0, 8)}\u2026`;
 
   return (
     <motion.article
@@ -63,11 +74,25 @@ export function VideoCard({ video, index, onClick }: VideoCardProps) {
             </div>
           )}
 
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-muted-foreground/70 flex-shrink-0" />
-            <span className="text-xs text-muted-foreground">
-              {formatNanoDate(video.uploadDate)}
-            </span>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-muted-foreground/70 flex-shrink-0" />
+              <span className="text-xs text-muted-foreground">
+                {formatNanoDate(video.uploadDate)}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <User className="w-3 h-3 text-muted-foreground/50 flex-shrink-0" />
+              <span
+                className={`text-xs ${
+                  isOwn
+                    ? "text-primary/80 font-medium"
+                    : "text-muted-foreground/60"
+                }`}
+              >
+                {uploaderLabel}
+              </span>
+            </div>
           </div>
         </div>
       </div>

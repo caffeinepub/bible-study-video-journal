@@ -31,6 +31,7 @@ export default function App() {
   const { identity, login, clear, isLoggingIn, isInitializing } =
     useInternetIdentity();
   const isAuthenticated = !!identity;
+  const callerPrincipal = identity?.getPrincipal().toString();
 
   const { data: publicVideos = [], isLoading: publicLoading } =
     useGetPublicFeedVideos();
@@ -38,7 +39,6 @@ export default function App() {
   const { data: userRole } = useGetUserRole();
 
   const canUpload = isAuthenticated && userRole !== UserRole.guest;
-  const isOnMyStudies = activeTab === "my-studies";
 
   return (
     <div className="min-h-screen parchment-texture">
@@ -79,7 +79,7 @@ export default function App() {
               ) : isAuthenticated ? (
                 <>
                   <AnimatePresence>
-                    {canUpload && isOnMyStudies && (
+                    {canUpload && (
                       <motion.div
                         key="upload-btn"
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -94,7 +94,7 @@ export default function App() {
                           className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                         >
                           <Upload className="w-4 h-4" />
-                          <span className="hidden sm:inline">Upload Video</span>
+                          <span className="hidden sm:inline">Share Study</span>
                         </Button>
                       </motion.div>
                     )}
@@ -153,9 +153,8 @@ export default function App() {
                 </span>
               </h2>
               <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-                Browse the host&#39;s Bible study sessions below, or sign in to
-                start your own personal study journal — your sessions stay
-                private to your account.
+                Browse Bible study sessions shared by the community below, or
+                sign in to share your own.
               </p>
 
               {/* Decorative verse */}
@@ -186,7 +185,7 @@ export default function App() {
                     ) : (
                       <LogIn className="w-4 h-4" />
                     )}
-                    Sign in to Start Your Journal
+                    Sign in to Share Your Study
                   </Button>
                 </motion.div>
               )}
@@ -223,11 +222,11 @@ export default function App() {
                 )}
               </TabsList>
 
-              {/* Upload button for My Studies tab on smaller screens */}
+              {/* Upload button inline for Scripture Journal tab on authenticated users */}
               <AnimatePresence>
-                {canUpload && isOnMyStudies && (
+                {canUpload && activeTab === "scripture-journal" && (
                   <motion.div
-                    key="upload-mobile"
+                    key="upload-feed"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
@@ -242,49 +241,63 @@ export default function App() {
                       className="gap-2 border-accent/40 hover:bg-accent/10"
                     >
                       <Upload className="w-4 h-4" />
-                      Upload
+                      Share
                     </Button>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Scripture Journal Tab — host's public feed */}
+            {/* Scripture Journal Tab — community public feed */}
             <TabsContent value="scripture-journal" className="mt-0">
               <div className="mb-4">
                 <p className="text-xs text-muted-foreground">
                   {!publicLoading && publicVideos.length > 0
                     ? `${publicVideos.length} ${
                         publicVideos.length === 1 ? "session" : "sessions"
-                      } published`
-                    : "The host's Bible study sessions"}
+                      } shared by the community`
+                    : "Community Bible study sessions"}
                 </p>
               </div>
               <VideoGallery
                 videos={publicVideos}
                 isLoading={publicLoading}
                 onSelectVideo={setSelectedVideo}
-                emptyMessage="No sessions published yet. Check back soon."
+                callerPrincipal={callerPrincipal}
+                emptyMessage="No sessions shared yet. Sign in and be the first to share your Bible study!"
               />
             </TabsContent>
 
-            {/* My Studies Tab — personal journal */}
+            {/* My Studies Tab — personal archive */}
             {isAuthenticated && (
               <TabsContent value="my-studies" className="mt-0">
-                <div className="mb-4">
+                <div className="mb-4 flex items-center justify-between gap-3">
                   <p className="text-xs text-muted-foreground">
                     {!myVideosLoading && myVideos.length > 0
                       ? `${myVideos.length} ${
                           myVideos.length === 1 ? "recording" : "recordings"
-                        } in your journal`
+                        } in your archive`
                       : "Your personal study recordings"}
                   </p>
+                  {canUpload && (
+                    <Button
+                      data-ocid="my-studies.upload_button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setUploadOpen(true)}
+                      className="gap-2 border-accent/40 hover:bg-accent/10"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Share New Study
+                    </Button>
+                  )}
                 </div>
                 <VideoGallery
                   videos={myVideos}
                   isLoading={myVideosLoading}
                   onSelectVideo={setSelectedVideo}
-                  emptyMessage="You haven't recorded any studies yet. Hit Upload to start your own journal."
+                  callerPrincipal={callerPrincipal}
+                  emptyMessage="You haven't shared any studies yet. Hit 'Share New Study' to contribute to the community."
                 />
               </TabsContent>
             )}

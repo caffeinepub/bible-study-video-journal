@@ -33,9 +33,9 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     deleteVideoEntry(videoId: string): Promise<void>;
     getAllVideos(): Promise<Array<VideoEntry>>;
+    getCallerUserRole(): Promise<UserRole>;
     getMyVideos(): Promise<Array<VideoEntry>>;
     getPublicFeedVideos(): Promise<Array<VideoEntry>>;
-    getCallerUserRole(): Promise<UserRole>;
     getVideo(id: string): Promise<VideoEntry | null>;
     isCallerAdmin(): Promise<boolean>;
 }

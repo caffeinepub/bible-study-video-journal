@@ -72,6 +72,8 @@ export const idlService = IDL.Service({
   'deleteVideoEntry' : IDL.Func([IDL.Text], [], []),
   'getAllVideos' : IDL.Func([], [IDL.Vec(VideoEntry)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getMyVideos' : IDL.Func([], [IDL.Vec(VideoEntry)], ['query']),
+  'getPublicFeedVideos' : IDL.Func([], [IDL.Vec(VideoEntry)], ['query']),
   'getVideo' : IDL.Func([IDL.Text], [IDL.Opt(VideoEntry)], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
 });
@@ -149,6 +151,8 @@ export const idlFactory = ({ IDL }) => {
     'deleteVideoEntry' : IDL.Func([IDL.Text], [], []),
     'getAllVideos' : IDL.Func([], [IDL.Vec(VideoEntry)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getMyVideos' : IDL.Func([], [IDL.Vec(VideoEntry)], ['query']),
+    'getPublicFeedVideos' : IDL.Func([], [IDL.Vec(VideoEntry)], ['query']),
     'getVideo' : IDL.Func([IDL.Text], [IDL.Opt(VideoEntry)], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   });

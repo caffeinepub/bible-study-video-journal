@@ -59,6 +59,8 @@ export interface _SERVICE {
   'deleteVideoEntry' : ActorMethod<[string], undefined>,
   'getAllVideos' : ActorMethod<[], Array<VideoEntry>>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getMyVideos' : ActorMethod<[], Array<VideoEntry>>,
+  'getPublicFeedVideos' : ActorMethod<[], Array<VideoEntry>>,
   'getVideo' : ActorMethod<[string], [] | [VideoEntry]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
 }

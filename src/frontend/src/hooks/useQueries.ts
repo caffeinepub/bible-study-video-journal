@@ -21,8 +21,7 @@ export function useGetPublicFeedVideos() {
     queryKey: ["publicFeedVideos"],
     queryFn: async () => {
       if (!actor) return [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (actor as any).getPublicFeedVideos() as Promise<VideoEntry[]>;
+      return actor.getPublicFeedVideos();
     },
     enabled: !!actor && !isFetching,
   });
@@ -36,8 +35,7 @@ export function useGetMyVideos() {
     queryKey: ["myVideos"],
     queryFn: async () => {
       if (!actor) return [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (actor as any).getMyVideos() as Promise<VideoEntry[]>;
+      return actor.getMyVideos();
     },
     enabled: !!actor && !isFetching && isAuthenticated,
   });

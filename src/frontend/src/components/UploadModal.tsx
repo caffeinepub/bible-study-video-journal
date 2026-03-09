@@ -92,7 +92,7 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
         videoBlob: blob,
       });
 
-      toast.success("Your Bible study has been saved to your journal!");
+      toast.success("Your Bible study has been shared with the community!");
       resetForm();
       onClose();
     } catch {
@@ -137,10 +137,10 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
             <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
               <div>
                 <h2 className="font-display text-lg font-bold text-foreground">
-                  Record a Study Session
+                  Share a Study Session
                 </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Add your Bible reading or study video
+                  Add your Bible reading or study video to the community
                 </p>
               </div>
               <Button
@@ -167,9 +167,9 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
                     Study Title <span className="text-destructive">*</span>
                   </Label>
                   <Input
-                    data-ocid="upload.title_input"
+                    data-ocid="upload.input"
                     id="upload-title"
-                    placeholder="e.g. Morning devotion — Psalm 23"
+                    placeholder="e.g. Morning devotion \u2014 Psalm 23"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     disabled={addEntry.isPending}
@@ -190,7 +190,7 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
                     </span>
                   </Label>
                   <Input
-                    data-ocid="upload.reference_input"
+                    data-ocid="upload.search_input"
                     id="upload-reference"
                     placeholder="e.g. John 3:16, Romans 8:28-39"
                     value={bibleReference}
@@ -212,7 +212,7 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
                     </span>
                   </Label>
                   <Textarea
-                    data-ocid="upload.description_textarea"
+                    data-ocid="upload.textarea"
                     id="upload-description"
                     placeholder="Share what you learned or felt during this session..."
                     value={description}
@@ -223,7 +223,7 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
                   />
                 </div>
 
-                {/* File dropzone — label wraps hidden input for accessible file picking */}
+                {/* File dropzone */}
                 <div className="space-y-1.5">
                   <span className="text-sm font-medium">
                     Video File <span className="text-destructive">*</span>
@@ -330,7 +330,7 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
                   ) : (
                     <Upload className="w-4 h-4" />
                   )}
-                  {addEntry.isPending ? "Saving..." : "Save to Journal"}
+                  {addEntry.isPending ? "Sharing..." : "Share with Community"}
                 </Button>
               </div>
             </form>

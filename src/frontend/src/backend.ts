@@ -127,6 +127,8 @@ export interface backendInterface {
     deleteVideoEntry(videoId: string): Promise<void>;
     getAllVideos(): Promise<Array<VideoEntry>>;
     getCallerUserRole(): Promise<UserRole>;
+    getMyVideos(): Promise<Array<VideoEntry>>;
+    getPublicFeedVideos(): Promise<Array<VideoEntry>>;
     getVideo(id: string): Promise<VideoEntry | null>;
     isCallerAdmin(): Promise<boolean>;
 }
@@ -299,6 +301,34 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getCallerUserRole();
             return from_candid_UserRole_n17(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getMyVideos(): Promise<Array<VideoEntry>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getMyVideos();
+                return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getMyVideos();
+            return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getPublicFeedVideos(): Promise<Array<VideoEntry>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getPublicFeedVideos();
+                return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getPublicFeedVideos();
+            return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
         }
     }
     async getVideo(arg0: string): Promise<VideoEntry | null> {

@@ -9,6 +9,7 @@ interface VideoGalleryProps {
   isLoading: boolean;
   onSelectVideo: (video: VideoEntry) => void;
   emptyMessage?: string;
+  callerPrincipal?: string;
 }
 
 export function VideoGallery({
@@ -16,6 +17,7 @@ export function VideoGallery({
   isLoading,
   onSelectVideo,
   emptyMessage,
+  callerPrincipal,
 }: VideoGalleryProps) {
   if (isLoading) {
     return (
@@ -78,6 +80,7 @@ export function VideoGallery({
           video={video}
           index={index + 1}
           onClick={() => onSelectVideo(video)}
+          callerPrincipal={callerPrincipal}
         />
       ))}
     </div>
