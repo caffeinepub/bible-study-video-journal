@@ -31,6 +31,7 @@ export enum UserRole {
 export interface backendInterface {
     addVideoEntry(id: string, title: string, description: string | null, bibleReference: string | null, videoBlob: ExternalBlob): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    claimAdminIfFirst(): Promise<void>;
     deleteVideoEntry(videoId: string): Promise<void>;
     getAllVideos(): Promise<Array<VideoEntry>>;
     getCallerUserRole(): Promise<UserRole>;

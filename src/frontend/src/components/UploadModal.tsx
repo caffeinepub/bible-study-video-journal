@@ -95,8 +95,10 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
       toast.success("Your Bible study has been shared with the community!");
       resetForm();
       onClose();
-    } catch {
-      toast.error("Upload failed. Please try again.");
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : "Upload failed. Please try again.";
+      toast.error(msg);
       setUploadProgress(0);
     }
   };

@@ -124,9 +124,8 @@
   }
 
   .ink-shadow {
-    box-shadow:
-      0 2px 8px oklch(24% 0.06 44 / 0.14),
-      0 1px 2px oklch(24% 0.06 44 / 0.08);
+    box-shadow: 0 2px 8px oklch(24% 0.06 44 / 0.14), 0 1px 2px
+      oklch(24% 0.06 44 / 0.08);
   }
 
   .gold-border {
@@ -136,9 +135,8 @@
   .illuminated-card {
     background: oklch(91% 0.04 76 / 0.94);
     border: 1px solid oklch(68% 0.14 62 / 0.35);
-    box-shadow:
-      0 4px 16px oklch(24% 0.06 44 / 0.12),
-      inset 0 1px 0 oklch(91% 0.04 76 / 0.6);
+    box-shadow: 0 4px 16px oklch(24% 0.06 44 / 0.12), inset 0 1px 0
+      oklch(91% 0.04 76 / 0.6);
     backdrop-filter: blur(8px);
   }
 }

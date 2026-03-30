@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   BookMarked,
   BookOpen,
@@ -11,12 +12,13 @@ import {
   Users,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { VideoEntry } from "./backend";
 import { UserRole } from "./backend";
 import { UploadModal } from "./components/UploadModal";
 import { VideoGallery } from "./components/VideoGallery";
 import { VideoPlayerModal } from "./components/VideoPlayerModal";
+import { useActor } from "./hooks/useActor";
 import { useInternetIdentity } from "./hooks/useInternetIdentity";
 import {
   useGetMyVideos,
@@ -30,22 +32,40 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("scripture-journal");
   const { identity, login, clear, isLoggingIn, isInitializing } =
     useInternetIdentity();
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
   const isAuthenticated = !!identity;
   const callerPrincipal = identity?.getPrincipal().toString();
+
+  useEffect(() => {
+    if (!actor || !identity) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (actor as any)
+      .claimAdminIfFirst()
+      .then(() => queryClient.invalidateQueries({ queryKey: ["userRole"] }))
+      .catch(() => {});
+  }, [actor, identity, queryClient]);
 
   const { data: publicVideos = [], isLoading: publicLoading } =
     useGetPublicFeedVideos();
   const { data: myVideos = [], isLoading: myVideosLoading } = useGetMyVideos();
   const { data: userRole } = useGetUserRole();
 
-  const canUpload = isAuthenticated && userRole !== UserRole.guest;
+  // Only the admin (canister owner) can upload — backend enforces this.
+  // We show the button to any authenticated user; non-admins will get a
+  // backend error if they try, but this prevents the button from being
+  // hidden while the role is still loading.
+  const canUpload = userRole === UserRole.admin;
 
   return (
     <div className="min-h-screen parchment-texture">
-      {/* Parchment overlay for legibility */}
-      <div className="min-h-screen bg-background/70">
+      {/* Desert-toned overlay for legibility */}
+      <div className="min-h-screen bg-background/75">
         {/* Header */}
-        <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
+        <header
+          className="sticky top-0 z-40 border-b border-border backdrop-blur-md"
+          style={{ background: "oklch(84% 0.055 74 / 0.9)" }}
+        >
           <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
             {/* Logo + title */}
             <motion.div
@@ -62,7 +82,7 @@ export default function App() {
                   Scripture Journal
                 </h1>
                 <p className="text-xs text-muted-foreground">
-                  Community Bible Study Platform
+                  Blockchain Bible Study
                 </p>
               </div>
             </motion.div>
@@ -79,25 +99,23 @@ export default function App() {
               ) : isAuthenticated ? (
                 <>
                   <AnimatePresence>
-                    {canUpload && (
-                      <motion.div
-                        key="upload-btn"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.2 }}
+                    <motion.div
+                      key="upload-btn"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Button
+                        data-ocid="nav.upload_button"
+                        onClick={() => setUploadOpen(true)}
+                        size="sm"
+                        className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                       >
-                        <Button
-                          data-ocid="nav.upload_button"
-                          onClick={() => setUploadOpen(true)}
-                          size="sm"
-                          className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                        >
-                          <Upload className="w-4 h-4" />
-                          <span className="hidden sm:inline">Share Study</span>
-                        </Button>
-                      </motion.div>
-                    )}
+                        <Upload className="w-4 h-4" />
+                        <span className="hidden sm:inline">Share Study</span>
+                      </Button>
+                    </motion.div>
                   </AnimatePresence>
                   <Button
                     variant="ghost"
@@ -111,27 +129,37 @@ export default function App() {
                   </Button>
                 </>
               ) : (
+                // Subtle sign-in button for admin access — not prominently advertised to visitors
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={login}
                   disabled={isLoggingIn}
-                  className="gap-2 border-border hover:border-primary/40"
+                  className="gap-2 text-muted-foreground hover:text-foreground"
+                  aria-label="Sign in"
                 >
                   {isLoggingIn ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <LogIn className="w-4 h-4" />
                   )}
-                  {isLoggingIn ? "Signing in\u2026" : "Sign in"}
+                  <span className="hidden sm:inline text-xs">
+                    {isLoggingIn ? "Signing in\u2026" : "Sign in"}
+                  </span>
                 </Button>
               )}
             </motion.div>
           </div>
         </header>
 
-        {/* Hero section */}
-        <section className="border-b border-border bg-gradient-to-b from-background/60 to-transparent">
+        {/* Hero section — warm dune gradient */}
+        <section
+          className="border-b border-border"
+          style={{
+            background:
+              "linear-gradient(to bottom, oklch(82% 0.065 72), oklch(88% 0.055 78))",
+          }}
+        >
           <div className="container mx-auto px-4 py-12 md:py-16">
             <motion.div
               className="max-w-2xl mx-auto text-center"
@@ -142,19 +170,15 @@ export default function App() {
               <div className="flex items-center justify-center gap-2 mb-3">
                 <BookOpen className="w-4 h-4 text-accent-foreground/60" />
                 <span className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
-                  Community Archive
+                  Video Archive
                 </span>
               </div>
               <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground leading-tight mb-3">
-                Bible Study
-                <br />
-                <span className="font-serif italic font-normal text-muted-foreground">
-                  Video Journal
-                </span>
+                Blockchain Bible Study
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Browse Bible study sessions shared by the community below, or
-                sign in to share your own.
+                A read-through study of the bible from Genesis to Revelation on
+                the Internet Computer
               </p>
 
               {/* Decorative verse */}
@@ -167,34 +191,15 @@ export default function App() {
                   &#8212; Psalm 119:105
                 </p>
               </div>
-
-              {!isAuthenticated && !isInitializing && (
-                <motion.div
-                  className="mt-6 flex justify-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <Button
-                    onClick={login}
-                    disabled={isLoggingIn}
-                    className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    {isLoggingIn ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <LogIn className="w-4 h-4" />
-                    )}
-                    Sign in to Share Your Study
-                  </Button>
-                </motion.div>
-              )}
             </motion.div>
           </div>
         </section>
 
-        {/* Main content */}
-        <main className="container mx-auto px-4 py-10">
+        {/* Main content — dry earth mid-tone */}
+        <main
+          className="container mx-auto px-4 py-10"
+          style={{ background: "oklch(85% 0.05 76)" }}
+        >
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
@@ -210,7 +215,7 @@ export default function App() {
                   <BookOpen className="w-4 h-4" />
                   <span>Scripture Journal</span>
                 </TabsTrigger>
-                {isAuthenticated && (
+                {canUpload && (
                   <TabsTrigger
                     data-ocid="tabs.my-studies.tab"
                     value="my-studies"
@@ -222,16 +227,15 @@ export default function App() {
                 )}
               </TabsList>
 
-              {/* Upload button inline for Scripture Journal tab on authenticated users */}
+              {/* Upload button inline for Scripture Journal tab — shown to any authenticated user */}
               <AnimatePresence>
-                {canUpload && activeTab === "scripture-journal" && (
+                {isAuthenticated && activeTab === "scripture-journal" && (
                   <motion.div
                     key="upload-feed"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.2 }}
-                    className="sm:hidden"
                   >
                     <Button
                       data-ocid="gallery.upload_button"
@@ -248,15 +252,15 @@ export default function App() {
               </AnimatePresence>
             </div>
 
-            {/* Scripture Journal Tab — community public feed */}
+            {/* Scripture Journal Tab — public feed */}
             <TabsContent value="scripture-journal" className="mt-0">
               <div className="mb-4">
                 <p className="text-base text-muted-foreground">
                   {!publicLoading && publicVideos.length > 0
                     ? `${publicVideos.length} ${
                         publicVideos.length === 1 ? "session" : "sessions"
-                      } shared by the community`
-                    : "Community Bible study sessions"}
+                      } in the journal`
+                    : "Bible study sessions"}
                 </p>
               </div>
               <VideoGallery
@@ -264,12 +268,12 @@ export default function App() {
                 isLoading={publicLoading}
                 onSelectVideo={setSelectedVideo}
                 callerPrincipal={callerPrincipal}
-                emptyMessage="No sessions shared yet. Sign in and be the first to share your Bible study!"
+                emptyMessage="No sessions yet. Check back soon!"
               />
             </TabsContent>
 
-            {/* My Studies Tab — personal archive */}
-            {isAuthenticated && (
+            {/* My Studies Tab — admin only */}
+            {canUpload && (
               <TabsContent value="my-studies" className="mt-0">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <p className="text-base text-muted-foreground">
@@ -279,33 +283,34 @@ export default function App() {
                         } in your archive`
                       : "Your personal study recordings"}
                   </p>
-                  {canUpload && (
-                    <Button
-                      data-ocid="my-studies.upload_button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setUploadOpen(true)}
-                      className="gap-2 border-accent/40 hover:bg-accent/10"
-                    >
-                      <Upload className="w-4 h-4" />
-                      Share New Study
-                    </Button>
-                  )}
+                  <Button
+                    data-ocid="my-studies.upload_button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setUploadOpen(true)}
+                    className="gap-2 border-accent/40 hover:bg-accent/10"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload Study
+                  </Button>
                 </div>
                 <VideoGallery
                   videos={myVideos}
                   isLoading={myVideosLoading}
                   onSelectVideo={setSelectedVideo}
                   callerPrincipal={callerPrincipal}
-                  emptyMessage="You haven't shared any studies yet. Hit 'Share New Study' to contribute to the community."
+                  emptyMessage="No recordings yet. Upload your first Bible study!"
                 />
               </TabsContent>
             )}
           </Tabs>
         </main>
 
-        {/* Footer */}
-        <footer className="border-t border-border bg-background/60 mt-auto">
+        {/* Footer — darker dusty adobe */}
+        <footer
+          className="border-t border-border mt-auto"
+          style={{ background: "oklch(78% 0.06 68)" }}
+        >
           <div className="container mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <BookMarked className="w-3.5 h-3.5" />
@@ -326,8 +331,6 @@ export default function App() {
           </div>
         </footer>
       </div>
-
-      {/* Modals */}
       <UploadModal open={uploadOpen} onClose={() => setUploadOpen(false)} />
       <VideoPlayerModal
         video={selectedVideo}

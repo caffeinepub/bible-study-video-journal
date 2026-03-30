@@ -36,9 +36,10 @@ actor {
 
   let videoEntries = Map.empty<Text, VideoEntry>();
 
+  // Only admin (the owner) can upload videos
   public shared ({ caller }) func addVideoEntry(id : Text, title : Text, description : ?Text, bibleReference : ?Text, videoBlob : Storage.ExternalBlob) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can upload videos");
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only the admin can upload videos");
     };
     if (title.isEmpty()) { Runtime.trap("Title cannot be empty!") };
 
@@ -61,8 +62,8 @@ actor {
         Runtime.trap("Video not found");
       };
       case (?video) {
-        if (video.uploadedBy != caller and not (AccessControl.isAdmin(accessControlState, caller))) {
-          Runtime.trap("Unauthorized: Only the owner or admin can delete this video");
+        if (not (AccessControl.isAdmin(accessControlState, caller))) {
+          Runtime.trap("Unauthorized: Only the admin can delete videos");
         };
         videoEntries.remove(videoId);
       };
@@ -70,9 +71,6 @@ actor {
   };
 
   public query ({ caller }) func getAllVideos() : async [VideoEntry] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
     videoEntries.values().toArray().sort();
   };
 
