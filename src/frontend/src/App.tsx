@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   BookMarked,
   BookOpen,
@@ -12,7 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { VideoEntry } from "./backend";
 import { UserRole } from "./backend";
 import { UploadModal } from "./components/UploadModal";
@@ -32,19 +31,9 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("scripture-journal");
   const { identity, login, clear, isLoggingIn, isInitializing } =
     useInternetIdentity();
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
+  useActor();
   const isAuthenticated = !!identity;
   const callerPrincipal = identity?.getPrincipal().toString();
-
-  useEffect(() => {
-    if (!actor || !identity) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (actor as any)
-      .claimAdminIfFirst()
-      .then(() => queryClient.invalidateQueries({ queryKey: ["userRole"] }))
-      .catch(() => {});
-  }, [actor, identity, queryClient]);
 
   const { data: publicVideos = [], isLoading: publicLoading } =
     useGetPublicFeedVideos();

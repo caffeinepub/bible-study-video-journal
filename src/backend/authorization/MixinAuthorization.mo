@@ -15,12 +15,6 @@ mixin (accessControlState : AccessControl.AccessControlState) {
     };
   };
 
-  // The first authenticated user to call this becomes admin automatically.
-  // Safe to call on every sign-in — subsequent calls after admin is assigned do nothing harmful.
-  public shared ({ caller }) func claimAdminIfFirst() : async () {
-    AccessControl.claimAdminIfFirst(accessControlState, caller);
-  };
-
   public query ({ caller }) func getCallerUserRole() : async AccessControl.UserRole {
     AccessControl.getUserRole(accessControlState, caller);
   };
