@@ -21,16 +21,21 @@ module {
     };
   };
 
-  // First principal that calls this function becomes admin, all other principals become users.
+  // The first non-anonymous caller to sign in is automatically made admin.
+  // No token required. Subsequent callers are registered as regular users.
+  // If the caller is already in the map but no admin has been assigned yet,
+  // they are promoted to admin (handles the case where user signed in before fix).
   public func initialize(state : AccessControlState, caller : Principal, adminToken : Text, userProvidedToken : Text) {
     if (caller.isAnonymous()) { return };
-    switch (state.userRoles.get(caller)) {
-      case (?_) {};
-      case (null) {
-        if (not state.adminAssigned and userProvidedToken == adminToken) {
-          state.userRoles.add(caller, #admin);
-          state.adminAssigned := true;
-        } else {
+    if (not state.adminAssigned) {
+      // No admin yet — make this caller the admin, overwriting any existing role
+      state.userRoles.add(caller, #admin);
+      state.adminAssigned := true;
+    } else {
+      // Admin already assigned — register as user only if not yet registered
+      switch (state.userRoles.get(caller)) {
+        case (?_) {};
+        case (null) {
           state.userRoles.add(caller, #user);
         };
       };
